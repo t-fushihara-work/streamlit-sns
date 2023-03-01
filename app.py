@@ -3,7 +3,7 @@ import os
 import openai
 # from docopt import docopt
 # from google.cloud import storage as gcs
-import pandas as pd
+# import pandas as pd
 #from io import BytesIO
 
 openai.api_key = st.secrets["openai_api_key"]
