@@ -6,7 +6,7 @@ import openai
 import pandas as pd
 #from io import BytesIO
 
-openai.api_key = "YOUR_API_KEY"
+openai.api_key = "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"
 
 params = {
     'product':'', # 商品名
