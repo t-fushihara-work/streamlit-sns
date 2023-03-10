@@ -6,7 +6,7 @@ import openai
 import pandas as pd
 #from io import BytesIO
 
-openai.api_key =  "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"
+openai.api_key =  st.secrets["openai_api_key"]
 ####################設定####################
 item_dict = {"ヤクルト":"yakuruto","カヌレ":"kanure", "マリトッツォ":"maritozzo"} 
 
@@ -129,7 +129,7 @@ def create_tag_prompt(answer):
 def read_data(item):
     item_name = item_dict[item]
     print(item_name)
-    df = pd.read_csv(f"./data/{item_name}_sample.csv")        
+    df = pd.read_csv(f"./{item_name}_sample.csv")        
     return df["text"].to_list()
 
 
