@@ -120,7 +120,7 @@ def read_data(item,menu):
     item_name = item_dict[item]
     menu_name = menu_dict[menu]
     print(item_name)
-    df = pd.read_csv(f"./{item_name}_{menu_name}_sample.csv")        
+    df = pd.read_csv(f"./data/{item_name}_{menu_name}_sample.csv")        
     return df["text"].to_list()
 
 
