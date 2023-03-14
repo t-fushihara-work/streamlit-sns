@@ -8,7 +8,8 @@ import pandas as pd
 
 openai.api_key =  st.secrets["openai_api_key"]
 ####################設定####################
-item_dict = {"ヤクルト":"yakuruto","カヌレ":"kanure", "マリトッツォ":"maritozzo"} 
+item_dict = {"ヤクルト":"yakuruto","カヌレ":"kanure", "マリトッツォ":"maritotwo"} 
+menu_dict = {"要望":"yobo","利点":"riten"} 
 
 params = {
     'product':'', # 商品名
@@ -61,22 +62,13 @@ def create_prompt(params):
     
     if extract == "商品名抽出":
         prompt = f"""
-            以下の各々独立した文章群から、コンビニまたはセブンで取り扱いを希望されている商品の名前を各商品に言及した文章数, 理由とともに重複なく全て列挙せよ。
-            ※ 商品名は文書間で表記揺れがあるため、表記揺れを直した上で一つに集約しなさい。
-            ※ 理由は文章中に含まれない場合がある。その場合は「無し」としなさい。
-            ※ 理由は短い文章で答えなさい。
-            ※ 出力は以下の例題を参考にして、csv形式で出力しなさい。
-            【例題】
-            - マリトッツォセブンでも売ってほしい
-            - ヤクルト1000どこに行っても売ってない、、、セブンに再入荷してくれないかな
-            - マリトッツォってシュークリームとそんな変わらないけどなんであんなにおいしいんだろう、コンビニでもっと売ってほしい
-            出力結果→ 
-            ヤクルト1000,1,なし
-            マリトッツォ,2,おいしそうだから
-            
-            【文章群】
-            {tweets}
-        """
+    以下の各々独立した文章群から、コンビニまたはセブンで取り扱いを希望されている商品の名前を各商品に言及した文章数, 理由とともに重複なく全て列挙せよ。
+    ※ 商品名は文書間で表記揺れがあるため、表記揺れを直した上で一つに集約しなさい。
+    ※ 理由は文章中に含まれない場合がある。その場合は「無し」としなさい。
+    ※ 理由は短い文章で答えなさい。
+    【文章群】
+    {tweets}
+    """
         st.session_state["question"] = ""
     else:
         if extract == "要望":
@@ -91,9 +83,7 @@ def create_prompt(params):
         st.session_state["question"] = question
         start_prompt = f"""
         以下のそれぞれ独立した文章群から、{question}を箇条書きで教えてください。
-        ※ 全ての文章に{question}が記載されているとは限らないので、生成確信度が高い項目だけ列挙してください。
-        ※ 生成結果に商品名は記載しないでください。
-        
+        ただし、全ての文章に{question}が記載されているとは限らないので、生成確信度が高い項目だけ列挙してください。
         """
         end_prompt = f'\n\n{question}：'
         prompt = start_prompt + tweets + end_prompt
@@ -126,10 +116,11 @@ def create_tag_prompt(answer):
     prompt = start_prompt + answer + end_prompt
     return prompt
 
-def read_data(item):
+def read_data(item,menu):
     item_name = item_dict[item]
+    menu_name = menu_dict[menu]
     print(item_name)
-    df = pd.read_csv(f"./{item_name}_sample.csv")        
+    df = pd.read_csv(f"./{item_name}_{menu_name}_sample.csv")        
     return df["text"].to_list()
 
 
@@ -165,9 +156,9 @@ def free_text_area():
             change_page()
             
 def sample_area(): 
-    menu = st.selectbox("メニューリスト", ("要望","利点","商品名抽出"))
+    menu = st.selectbox("メニューリスト", ("要望","利点"))
     item = st.radio("商品を選択してください。",("ヤクルト", "カヌレ","マリトッツォ"), horizontal=True)
-    text_list = read_data(item)
+    text_list = read_data(item,menu)
     with st.form("my_form", clear_on_submit=False):
         st.write("以下のツイートサンプルから対象ツイートを選択してください。")
         all_text = ""
@@ -199,7 +190,7 @@ def extract_results_page():
         text = f'商品名抽出の結果、コンビニまたはセブンで取り扱いを希望されている商品名と、言及ツイート数、商品化希望理由は以下の通りです。'
         st.write(text) 
         st.write("結果：")
-        st.write(answer.replace('\n','  \n'))
+        st.write(answer)
         st.write("入力ツイート:")
         st.markdown(params['tweets'].replace('\n','  \n'))
     
@@ -212,11 +203,11 @@ def extract_results_page():
         text = f'確定したタグは下記になります。'
         st.write(text) 
         st.write(tag_answer)
-        #st.header(params['extract'])
-        #text = f'{st.session_state["question"]}は下記になります。'
-        #st.write(text)
-        #st.write("結果：")
-        #st.write(answer)
+        st.header(params['extract'])
+        text = f'{st.session_state["question"]}は下記になります。'
+        st.write(text)
+        st.write("結果：")
+        st.write(answer)
         st.write("入力ツイート:")
         st.markdown(params['tweets'].replace('\n','  \n')) 
         #st.write("結果：")
